@@ -1,3 +1,26 @@
+server:
+  port: ${PORT:8080}
+
 spring:
   application:
-    name: exam
+    name: loan-management
+  config:
+    import:
+      - optional:file:.env[.properties]
+  datasource:
+    url: jdbc:sqlserver://${DB_HOST:localhost}:${DB_PORT:1433};databaseName=${DB_NAME:ExamDB};encrypt=true;trustServerCertificate=true
+    username: ${DB_USERNAME:sa}
+    password: ${DB_PASSWORD:12345}
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.SQLServerDialect
+
+springdoc:
+  swagger-ui:
+    syntax-highlight:
+      theme: monokai
