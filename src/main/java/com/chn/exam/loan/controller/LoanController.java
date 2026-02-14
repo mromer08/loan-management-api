@@ -1,6 +1,5 @@
 package com.chn.exam.loan.controller;
 
-import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.data.domain.Pageable;
@@ -23,10 +22,16 @@ import lombok.RequiredArgsConstructor;
 public class LoanController {
     private final LoanService loanService;
 
+    @GetMapping("/loans/{loanId}")
+    public ResponseEntity<LoanResponseDTO> getLoanById(@PathVariable UUID loanId) {
+        LoanResponseDTO loan = loanService.getLoanById(loanId);
+        return ResponseEntity.ok(loan);
+    }
+
     @GetMapping("/customers/{customerId}/loans")
     public ResponseEntity<PagedResponseDTO<LoanResponseDTO>> getLoanApplicationsByCustomer(
             @PathVariable UUID customerId,
-            @RequestParam(required = false) Set<LoanStatus> status,
+            @RequestParam(required = false) LoanStatus status,
             @PageableDefault Pageable pageable) {
         GetLoansRequestDTO requestDTO = new GetLoansRequestDTO(status);
         PagedResponseDTO<LoanResponseDTO> loans = loanService.getLoanApplicationsByCustomer(customerId, requestDTO,
@@ -42,11 +47,11 @@ public class LoanController {
         return ResponseEntity.ok(history);
     }
 
-    @PostMapping("/customers/{identificationNumber}/loans")
+    @PostMapping("/customers/{customerId}/loans")
     public ResponseEntity<LoanResponseDTO> submitLoanApplication(
-            @PathVariable String identificationNumber,
+            @PathVariable UUID customerId,
             @RequestBody @Valid SubmitLoanApplicationRequestDTO requestDTO) {
-        LoanResponseDTO loan = loanService.submitLoanApplication(identificationNumber, requestDTO);
+        LoanResponseDTO loan = loanService.submitLoanApplication(customerId, requestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(loan);
     }
 

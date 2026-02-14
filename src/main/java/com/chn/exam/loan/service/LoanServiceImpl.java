@@ -50,9 +50,17 @@ public class LoanServiceImpl implements LoanService {
     private final LoanStatusHistoryMapper loanStatusHistoryMapper;
 
     @Override
-    public LoanResponseDTO submitLoanApplication(String identificationNumber, SubmitLoanApplicationRequestDTO request) {
-        Customer customer = customerRepository.findByIdentificationNumber(identificationNumber)
-                .orElseThrow(() -> CustomerNotFoundException.forIdentificationNumber(identificationNumber));
+    @Transactional(readOnly = true)
+    public LoanResponseDTO getLoanById(UUID loanId) {
+        Loan loan = loanRepository.findById(loanId)
+                .orElseThrow(() -> LoanNotFoundException.forId(loanId));
+        return loanMapper.toResponseDto(loan);
+    }
+
+    @Override
+    public LoanResponseDTO submitLoanApplication(UUID customerId, SubmitLoanApplicationRequestDTO request) {
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> CustomerNotFoundException.forId(customerId));
 
         Loan loan = loanMapper.toEntity(request);
         loan.setCustomer(customer);
@@ -72,9 +80,10 @@ public class LoanServiceImpl implements LoanService {
         if (!customerRepository.existsById(customerId)) {
             throw CustomerNotFoundException.forId(customerId);
         }
-        Specification<Loan> specification = LoanSpecs.statusIn(request.status());
+        Specification<Loan> specification = Specification.where(LoanSpecs.customerIdEquals(customerId))
+                .and(LoanSpecs.statusEquals(request.status()));
 
-        Page<Loan> loansPage = loanRepository.findByCustomerId(customerId, specification, pageable);
+        Page<Loan> loansPage = loanRepository.findAll(specification, pageable);
         Page<LoanResponseDTO> loansDtoPage = loansPage.map(loanMapper::toResponseDto);
 
         return PageMapper.toPagedResponse(loansDtoPage);

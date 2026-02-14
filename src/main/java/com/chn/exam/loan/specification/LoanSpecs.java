@@ -19,6 +19,12 @@ public class LoanSpecs {
                 : root.get("status").in(statuses);
     }
 
+    public Specification<Loan> statusEquals(LoanStatus status) {
+        return (root, query, criteriaBuilder) -> (status == null)
+                ? null
+                : criteriaBuilder.equal(root.get("status"), status);
+    }
+
     public Specification<Loan> customerIdEquals(UUID customerId) {
         return (root, query, criteriaBuilder) -> (customerId == null)
                 ? null

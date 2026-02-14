@@ -16,6 +16,9 @@ import com.chn.exam.customer.mapper.CustomerMapper;
 import com.chn.exam.customer.model.Customer;
 import com.chn.exam.customer.repository.CustomerRepository;
 import com.chn.exam.customer.specification.CustomerSpecs;
+import com.chn.exam.loan.model.LoanPaymentStatus;
+import com.chn.exam.loan.model.LoanStatus;
+import com.chn.exam.loan.repository.LoanRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 public class CustomerServiceImpl implements CustomerService {
     private final CustomerRepository customerRepository;
     private final CustomerMapper customerMapper;
+    private final LoanRepository loanRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -84,6 +88,15 @@ public class CustomerServiceImpl implements CustomerService {
     public void deleteCustomer(UUID id) {
         if (!customerRepository.existsById(id)) {
             throw CustomerNotFoundException.forId(id);
+        }
+
+        boolean hasUnpaidApprovedLoans = loanRepository.hasPendingLoanByCustomerId(
+                id,
+                LoanStatus.APPROVED,
+                LoanPaymentStatus.PAID
+        );
+        if (hasUnpaidApprovedLoans) {
+            throw CustomerDeletionNotAllowedException.forPendingLoans(id);
         }
         customerRepository.deleteById(id);
     }
