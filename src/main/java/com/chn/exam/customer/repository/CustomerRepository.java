@@ -1,5 +1,6 @@
 package com.chn.exam.customer.repository;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,4 +17,5 @@ public interface CustomerRepository extends
     boolean existsByPhoneAndIdNot(String phone, UUID id);
     boolean existsByEmailAndIdNot(String email, UUID id);
     boolean existsByIdentificationNumberAndIdNot(String identificationNumber, UUID id);
+    Optional<Customer> findByIdentificationNumber(String identificationNumber);
 }

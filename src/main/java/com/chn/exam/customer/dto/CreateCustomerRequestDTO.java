@@ -30,6 +30,8 @@ public record CreateCustomerRequestDTO(
     @Size(max = 255)
     String address,
 
+    @NotBlank
+    @Size(max = 150)
     @Email
     String email,
 

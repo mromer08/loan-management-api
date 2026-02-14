@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,9 +23,10 @@ public class CustomerController {
 
     @GetMapping
     public ResponseEntity<PagedResponseDTO<CustomerResponseDTO>> getCustomers(
-        GetCustomersRequestDTO requestDTO,
+        @RequestParam(required = false) String searchTerm,
         @PageableDefault Pageable pageable
     ){
+        GetCustomersRequestDTO requestDTO = new GetCustomersRequestDTO(searchTerm);
         PagedResponseDTO<CustomerResponseDTO> customers = customerService.getCustomers(requestDTO, pageable);
         return ResponseEntity.ok(customers);
     }
@@ -42,7 +44,7 @@ public class CustomerController {
         @RequestBody @Valid CreateCustomerRequestDTO requestDTO
     ){
         CustomerResponseDTO customer = customerService.createCustomer(requestDTO);
-        return ResponseEntity.ok(customer);
+        return ResponseEntity.status(HttpStatus.CREATED).body(customer);
     }
 
     @PutMapping("/{id}")
